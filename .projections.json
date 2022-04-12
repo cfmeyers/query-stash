@@ -1,0 +1,10 @@
+    {
+      "query_stash/*.py": {
+        "alternate": "tests/test_{}.py",
+        "type": "source"
+      },
+      "tests/test_{}.py": {
+        "alternate": "query_stash/*.py",
+        "type": "test"
+      }
+    }
