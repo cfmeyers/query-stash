@@ -10,6 +10,7 @@ with open("README.md") as readme_file:
 
 requirements = [
     "Click>=6.0",
+    "toml==0.9.0",
 ]
 
 setup_requirements = [

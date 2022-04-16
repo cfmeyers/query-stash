@@ -1,0 +1,8 @@
+[connections]
+    [connections.dbt-postgres]
+    type = "postgres"
+    host = "localhost"
+    user = "postgres"
+    password = "postgres"
+    port = 5432
+    db_name = "jaffle_shop"
