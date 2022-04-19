@@ -5,4 +5,4 @@
     user = "postgres"
     password = "postgres"
     port = 5432
-    db_name = "jaffle_shop"
+    dbname = "jaffle_shop"
