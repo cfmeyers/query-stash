@@ -1,7 +1,8 @@
 import pytest
 from pytest import fixture
 
-from query_stash.config import ConfigException, get_config, get_connection_from_config
+from query_stash.config import (ConfigException, get_config,
+                                get_connection_from_config)
 
 
 class TestGetConfig:
@@ -15,7 +16,7 @@ class TestGetConfig:
                     "user": "postgres",
                     "password": "postgres",
                     "port": 5432,
-                    "db_name": "jaffle_shop",
+                    "dbname": "jaffle_shop",
                 }
             }
         }
@@ -32,7 +33,7 @@ class TestGetConnectionFromConfig:
                     "user": "postgres",
                     "password": "postgres",
                     "port": 5432,
-                    "db_name": "jaffle_shop",
+                    "dbname": "jaffle_shop",
                 }
             }
         }
@@ -47,13 +48,13 @@ class TestGetConnectionFromConfig:
                     "user": "postgres",
                     "password": "postgres",
                     "port": 5432,
-                    "db_name": "jaffle_shop",
+                    "dbname": "jaffle_shop",
                 },
                 "dbt-bigquery": {
                     "type": "bigquery",
                     "user": "bq",
                     "password": "bq",
-                    "db_name": "jaffle_shop",
+                    "dbname": "jaffle_shop",
                 },
             }
         }
@@ -66,7 +67,7 @@ class TestGetConnectionFromConfig:
             "user": "postgres",
             "password": "postgres",
             "port": 5432,
-            "db_name": "jaffle_shop",
+            "dbname": "jaffle_shop",
         }
 
     def test_it_returns_a_connection_if_no_connection_specified(
@@ -79,7 +80,7 @@ class TestGetConnectionFromConfig:
             "user": "postgres",
             "password": "postgres",
             "port": 5432,
-            "db_name": "jaffle_shop",
+            "dbname": "jaffle_shop",
         }
 
     def test_it_errors_if_no_connection_specified_and_multiple_connections_exist(

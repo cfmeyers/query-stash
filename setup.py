@@ -11,6 +11,7 @@ with open("README.md") as readme_file:
 requirements = [
     "Click>=6.0",
     "toml==0.9.0",
+    "psycopg2-binary==2.9.3",
 ]
 
 setup_requirements = [
@@ -29,13 +30,12 @@ setup(
         "Intended Audience :: Developers",
         "Natural Language :: English",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
     ],
     description="Query databases and keep a record of your results",
     entry_points={
         "console_scripts": [
-            "query-stash=query_stash.cli:main",
+            "query-stash=query_stash.cli:cli",
         ],
     },
     install_requires=requirements,
