@@ -7,6 +7,7 @@ from typing import Optional
 from query_stash.config import get_config, get_connection_from_config
 from query_stash.connectors import Connector
 from query_stash.render import RenderedTable, get_rendered_table
+from query_stash.sqlite import QueryStasher
 
 
 def connect_and_query_db(
@@ -15,4 +16,13 @@ def connect_and_query_db(
     connector = Connector(config_path, connection_name)
     results = connector.get_results(query)
     rendered_table = get_rendered_table(results)
+    stasher = QueryStasher()
+    tags = ""
+    stasher.stash(
+        query,
+        rendered_table,
+        tags,
+        connector.connection_name,
+        connector.connection_name,
+    )
     return rendered_table
