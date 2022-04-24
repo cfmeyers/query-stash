@@ -24,6 +24,8 @@ class Connector:
         self.connection_config = get_connection_from_config(config, connection_name)
         self.connection_type = self.connection_config["type"]
         self.conn = self.get_connection(self.connection_config)
+        self.connection_name = connection_name
+        self.connection_type = self.connection_config["type"]
 
     def get_connection(self, config: ConfigDict) -> PostgresConnection:
         if self.is_postgres:
@@ -38,8 +40,8 @@ class Connector:
     def get_results(self, query: str) -> List[RowDict]:
         with self.get_dict_cursor() as dict_cursor:
             dict_cursor.execute(query)
-            results = dict_cursor.fetchall()
-            return [dict(r) for r in results]
+            results = [dict(r) for r in dict_cursor.fetchall()]
+            return results
 
     @property
     def is_postgres(self) -> bool:
