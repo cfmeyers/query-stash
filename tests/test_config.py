@@ -1,8 +1,14 @@
+from unittest.mock import patch
+
 import pytest
 from pytest import fixture
 
-from query_stash.config import (ConfigException, get_config,
-                                get_connection_from_config)
+from query_stash.config import (
+    ConfigException,
+    config_directory_exists,
+    get_config,
+    get_connection_from_config,
+)
 
 
 class TestGetConfig:
@@ -87,4 +93,11 @@ class TestGetConnectionFromConfig:
         self, two_connection_config
     ):
         with pytest.raises(ConfigException):
-            it = get_connection_from_config(two_connection_config)
+            get_connection_from_config(two_connection_config)
+
+
+class TestConfigDirectoryExists:
+    @patch("query_stash.config.os.path.isdir")
+    def test_it(self, mock_isdir):
+        mock_isdir.return_value = True
+        assert config_directory_exists()
