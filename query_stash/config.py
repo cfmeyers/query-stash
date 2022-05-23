@@ -2,7 +2,7 @@ import os
 import sys
 from os.path import expanduser
 from pathlib import Path
-from typing import Any, Optional
+from typing import Optional
 
 import toml
 

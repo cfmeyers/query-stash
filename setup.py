@@ -12,6 +12,7 @@ requirements = [
     "Click>=6.0",
     "toml==0.9.0",
     "psycopg2-binary==2.9.3",
+    "snowflake-connector-python==2.7.7",
 ]
 
 setup_requirements = [
