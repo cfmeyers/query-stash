@@ -23,6 +23,8 @@ def pretty_money(amount) -> str:
 
 
 def pretty_generic_decimal(amount) -> str:
+    if amount == NULL_CHAR:
+        return NULL_CHAR
     rounded_str = "{0:,.2f}".format(amount)
     return rounded_str
 
