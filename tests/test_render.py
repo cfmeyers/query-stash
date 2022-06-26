@@ -2,8 +2,9 @@ from datetime import datetime
 
 from query_stash.render import (
     ColumnSpec,
+    RenderedPivotedTable,
     RenderedTable,
-    clean_column_heaades_for_rows,
+    clean_column_headers_for_rows,
     get_clean_headers,
     get_rendered_table,
     pretty_datetime,
@@ -55,7 +56,7 @@ class TestGetCleanHeaders:
 class TestCleanColumnHeaadesForRows:
     def test_it(self):
         rows = [{"id": 1, "count(distinct barcode)": 27596962761}]
-        it = clean_column_heaades_for_rows(rows)
+        it = clean_column_headers_for_rows(rows)
         assert it == [{"id": 1, "count_distinct_barcode": 27596962761}]
 
 
@@ -93,6 +94,55 @@ class TestRenderedTable:
 | 2    | Layla    |
 | 3    | Jack Ga… |
 | ---- | -------- |"""
+        assert expected == str(self.it)
+
+
+class TestRenderedPivotedTable:
+    @property
+    def id_column(self):
+        return ColumnSpec("id", width=2)
+
+    @property
+    def name_column(self):
+        return ColumnSpec("name", width=3)
+
+    @property
+    def it(self):
+        rows = [
+            {"id": 1, "name": "Sam"},
+        ]
+
+        column_specs = (self.id_column, self.name_column)
+        return RenderedPivotedTable(column_specs=column_specs, rows=rows)
+
+    def test_it_knows_key_columns(self):
+        assert self.it.keys == ["id", "name"]
+
+    def test_it_knows_key_column_width(self):
+        assert self.it.key_column_width == 4
+
+    def test_it_knows_vals_columns(self):
+        assert self.it.values == [1, "Sam"]
+
+    def test_it_knows_values_column_width(self):
+        assert self.it.values_column_width == 3
+
+    def test_it_can_calculate_a_break_line(self):
+        assert self.it.break_line == "| ---- | --- |"
+
+    def test_it_can_make_a_printable_row(self):
+        actual = self.it.make_printable_row(self.id_column)
+        assert "| id   | 1   |" == actual
+
+        actual = self.it.make_printable_row(self.name_column)
+        assert "| name | Sam |" == actual
+
+    def test_it_knows_how_to_print_itself(self):
+        expected = """\
+| ---- | --- |
+| id   | 1   |
+| name | Sam |
+| ---- | --- |"""
         assert expected == str(self.it)
 
 

@@ -1,7 +1,7 @@
 import re
 from datetime import datetime
 from decimal import Decimal
-from typing import Any, Callable, Dict, List, NamedTuple, Optional, Sequence, Union
+from typing import Callable, List, NamedTuple, Optional, Sequence
 
 from query_stash.types import RowDict
 
@@ -41,17 +41,19 @@ class ColumnSpec(NamedTuple):
     func: Callable = lambda x: x
     width: int = 10
 
-    def transform(self, item) -> str:
+    def transform(self, item, width: Optional[int] = None) -> str:
+        if width is None:
+            width = self.width
         if item is None:
             item = NULL_CHAR
         transformed = self.func(item)
         if type(transformed) != str:
             transformed = str(transformed)
-        if len(transformed) <= self.width:
-            return transformed.ljust(self.width)
+        if len(transformed) <= width:
+            return transformed.ljust(width)
         else:
-            truncated = transformed[: self.width - 1] + "…"
-            return truncated.ljust(self.width)
+            truncated = transformed[: width - 1] + "…"
+            return truncated.ljust(width)
 
 
 def get_clean_headers(original_headers: List[str]) -> List[str]:
@@ -64,7 +66,7 @@ def get_clean_headers(original_headers: List[str]) -> List[str]:
     return cleaned_headers
 
 
-def clean_column_heaades_for_rows(old_rows: List[RowDict]) -> List[RowDict]:
+def clean_column_headers_for_rows(old_rows: List[RowDict]) -> List[RowDict]:
     rows = old_rows.copy()
     headers = list(old_rows[0].keys())
     cleaned_headers = get_clean_headers(headers)
@@ -174,12 +176,82 @@ class RenderedTable(NamedTuple):
         return len(self.rows)
 
 
+class RenderedPivotedTable(NamedTuple):
+    """
+    An object that knows how to render its rows (list of dicts)
+
+    Can turn:
+        rows = [
+            {"id": 1, "name": "Sam"},
+        ]
+
+    into:
+        | ---- | --- |
+        | id   | 1   |
+        | name | Sam |
+        | ---- | --- |
+    """
+
+    column_specs: Sequence[ColumnSpec]
+    rows: List[RowDict]
+
+    @property
+    def keys(self):
+        return list(self.rows[0].keys())
+
+    @property
+    def key_column_width(self):
+        return max(len(x) for x in self.keys)
+
+    @property
+    def values(self):
+        return list(self.rows[0].values())
+
+    @property
+    def values_column_width(self):
+        return max(cs.width for cs in self.column_specs)
+
+    def _join_items_to_pipes(self, items: List[str]) -> str:
+        inner_cols = " | ".join(i for i in items)
+        return f"| {inner_cols} |"
+
+    @property
+    def break_line(self) -> str:
+        key_line = "-" * self.key_column_width
+        value_line = "-" * self.values_column_width
+        return f"| {key_line} | {value_line} |"
+
+    def make_printable_row(self, col_spec: ColumnSpec) -> str:
+        row = self.rows[0]
+        key = col_spec.name.ljust(self.key_column_width)
+        value = col_spec.transform(row[col_spec.name], width=self.values_column_width)
+        return self._join_items_to_pipes([key, value])
+
+    @property
+    def printable_rows(self) -> str:
+        return "\n".join(
+            self.make_printable_row(col_spec) for col_spec in self.column_specs
+        )
+
+    def __str__(self):
+        return f"""\
+{self.break_line}
+{self.printable_rows}
+{self.break_line}"""
+
+    def __getitem__(self, position):
+        return self.rows[position]
+
+    def __len__(self):
+        return len(self.rows)
+
+
 def get_rendered_table(rows: List[RowDict]) -> RenderedTable:
     """Get a RenderedTable with standard ColumnSpecs
     - comma-formatted integer columns
     - cleanly-formatted datetimes
     """
-    rows = clean_column_heaades_for_rows(rows)
+    rows = clean_column_headers_for_rows(rows)
     col_specs = []
     column_names = rows[0].keys()
     for column_name in column_names:
@@ -209,4 +281,7 @@ def get_rendered_table(rows: List[RowDict]) -> RenderedTable:
                 column_name, width=get_max_width_of_items([column_name] + values)
             )
         col_specs.append(spec)
-    return RenderedTable(column_specs=col_specs, rows=rows)
+    if len(rows) == 1:
+        return RenderedPivotedTable(column_specs=col_specs, rows=rows)
+    else:
+        return RenderedTable(column_specs=col_specs, rows=rows)
