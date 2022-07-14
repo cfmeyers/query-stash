@@ -12,9 +12,11 @@ from query_stash.sqlite import QueryStasher
 
 def connect_and_query_db(
     config_path: Optional[str], connection_name: Optional[str], query: str
-) -> RenderedTable:
+) -> str:
     connector = Connector(config_path, connection_name)
     results = connector.get_results(query)
+    if len(results) == 0:
+        return "Query returned no results!"
     rendered_table = get_rendered_table(results)
     stasher = QueryStasher()
     tags = ""
@@ -25,4 +27,4 @@ def connect_and_query_db(
         connector.connection_name,
         connector.connection_name,
     )
-    return rendered_table
+    return str(rendered_table)

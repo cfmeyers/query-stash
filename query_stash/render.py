@@ -6,7 +6,7 @@ from typing import Callable, List, NamedTuple, Optional, Sequence
 from query_stash.types import RowDict
 
 NULL_CHAR = "∅"
-COMMA_SUBSTRINGS = ("sum", "count", "total", "SUM", "COUNT", "TOTAL")
+COMMA_SUBSTRINGS = ("sum", "count", "total", "num", "SUM", "COUNT", "TOTAL", "NUM")
 
 
 def pretty_datetime(d: Optional[datetime]) -> str:
@@ -25,7 +25,7 @@ def pretty_money(amount) -> str:
 def pretty_generic_decimal(amount) -> str:
     if amount == NULL_CHAR:
         return NULL_CHAR
-    rounded_str = "{0:,.2f}".format(amount)
+    rounded_str = "{0:,.4f}".format(amount)
     return rounded_str
 
 
@@ -49,6 +49,7 @@ class ColumnSpec(NamedTuple):
         transformed = self.func(item)
         if type(transformed) != str:
             transformed = str(transformed)
+        transformed = transformed.replace("\n", "")  # for arrays, variants/json
         if len(transformed) <= width:
             return transformed.ljust(width)
         else:
