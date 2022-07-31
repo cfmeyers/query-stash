@@ -139,7 +139,7 @@ class RenderedTable(NamedTuple):
         for col_spec, header in zip(self.column_specs, self.headers):
             width = col_spec.width
             if len(header) <= width:
-                header_row_items.append(header.ljust(width))
+                header_row_items.append(header.ljust(width).lower())
             else:
                 truncated_header = header[: width - 1] + "…"
                 header_row_items.append(truncated_header.ljust(width))
@@ -224,7 +224,7 @@ class RenderedPivotedTable(NamedTuple):
 
     def make_printable_row(self, col_spec: ColumnSpec) -> str:
         row = self.rows[0]
-        key = col_spec.name.ljust(self.key_column_width)
+        key = col_spec.name.ljust(self.key_column_width).lower()
         value = col_spec.transform(row[col_spec.name], width=self.values_column_width)
         return self._join_items_to_pipes([key, value])
 

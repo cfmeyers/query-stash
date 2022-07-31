@@ -1,5 +1,7 @@
 from typing import List, Optional, Union
 
+from snowflake.connector.errors import ProgrammingError
+
 from query_stash.config import get_config, get_connection_from_config
 from query_stash.types import ConfigDict, RowDict
 
@@ -51,11 +53,14 @@ class Connector:
             return get_snowflake_dict_cursor(self.conn)
         raise Exception(f"Unknown connection type: {self.connection_type}")
 
-    def get_results(self, query: str) -> List[RowDict]:
+    def get_results(self, query: str) -> tuple[Optional[str], List[RowDict]]:
         with self.get_dict_cursor() as dict_cursor:
-            dict_cursor.execute(query)
-            results = [dict(r) for r in dict_cursor.fetchall()]
-            return results
+            try:
+                dict_cursor.execute(query)
+                results = [dict(r) for r in dict_cursor.fetchall()]
+                return None, results
+            except ProgrammingError as e:
+                return str(e), []
 
     @property
     def is_postgres(self) -> bool:

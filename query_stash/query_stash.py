@@ -14,17 +14,20 @@ def connect_and_query_db(
     config_path: Optional[str], connection_name: Optional[str], query: str
 ) -> str:
     connector = Connector(config_path, connection_name)
-    results = connector.get_results(query)
-    if len(results) == 0:
+    err, results = connector.get_results(query)
+    if len(results) == 0 and err is None:
         return "Query returned no results!"
-    rendered_table = get_rendered_table(results)
-    stasher = QueryStasher()
-    tags = ""
-    stasher.stash(
-        query,
-        rendered_table,
-        tags,
-        connector.connection_name,
-        connector.connection_name,
-    )
-    return str(rendered_table)
+    if err is None:
+        rendered_table = get_rendered_table(results)
+        stasher = QueryStasher()
+        tags = ""
+        stasher.stash(
+            query,
+            rendered_table,
+            tags,
+            connector.connection_name,
+            connector.connection_name,
+        )
+        return str(rendered_table)
+    else:
+        return err
