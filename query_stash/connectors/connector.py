@@ -60,7 +60,8 @@ class Connector:
                 results = [dict(r) for r in dict_cursor.fetchall()]
                 return None, results
             except ProgrammingError as e:
-                return str(e), []
+                err = "\n".join([f"┆{x}┆" for x in str(e).split("\n")])
+                return err, []
 
     @property
     def is_postgres(self) -> bool:

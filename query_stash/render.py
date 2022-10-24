@@ -25,8 +25,12 @@ def pretty_money(amount) -> str:
 def pretty_generic_decimal(amount) -> str:
     if amount == NULL_CHAR:
         return NULL_CHAR
-    rounded_str = "{0:,.4f}".format(amount)
-    return rounded_str
+    rounded_str = "{0:,.8f}".format(amount)
+    no_trailing_zeros = rounded_str.rstrip("0")
+    if no_trailing_zeros[-1] == ".":
+        return no_trailing_zeros + "0"
+    return no_trailing_zeros
+    # return rounded_str
 
 
 def pretty_int(amount) -> str:
@@ -263,7 +267,8 @@ def get_rendered_table(rows: List[RowDict]) -> RenderedTable:
         elif column_type in (Decimal, float):
             spec = ColumnSpec(
                 column_name,
-                width=get_max_width_of_items([column_name] + values) + 6,
+                # width=get_max_width_of_items([column_name] + values) + 6,
+                width=get_max_width_of_items([column_name] + values),
                 func=pretty_generic_decimal,
             )
         elif column_type == int and should_be_formatted_with_commas(column_name):
