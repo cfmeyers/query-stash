@@ -6,7 +6,18 @@ from typing import Callable, List, NamedTuple, Optional, Sequence
 from query_stash.types import RowDict
 
 NULL_CHAR = "∅"
-COMMA_SUBSTRINGS = ("sum", "count", "total", "num", "SUM", "COUNT", "TOTAL", "NUM")
+COMMA_SUBSTRINGS = (
+    "sum",
+    "count",
+    "total",
+    "num",
+    "SUM",
+    "COUNT",
+    "TOTAL",
+    "NUM",
+    "ct",
+    "CT",
+)
 
 
 def pretty_datetime(d: Optional[datetime]) -> str:
