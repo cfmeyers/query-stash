@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import List, Union
 
 from snowflake.connector.errors import ProgrammingError
 
@@ -29,7 +29,7 @@ def get_connection(config: ConfigDict):
 
 
 class Connector:
-    def __init__(self, config_path: Optional[str], connection_name: str):
+    def __init__(self, config_path: str | None, connection_name: str):
         config = get_config(config_path)
         self.connection_config = get_connection_from_config(config, connection_name)
         self.connection_type = self.connection_config["type"]
@@ -52,7 +52,7 @@ class Connector:
             return get_snowflake_dict_cursor(self.conn)
         raise Exception(f"Unknown connection type: {self.connection_type}")
 
-    def get_results(self, query: str) -> tuple[Optional[str], List[RowDict]]:
+    def get_results(self, query: str) -> tuple[str | None, List[RowDict]]:
         with self.get_dict_cursor() as dict_cursor:
             try:
                 dict_cursor.execute(query)
