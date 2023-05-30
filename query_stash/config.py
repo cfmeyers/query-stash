@@ -2,7 +2,6 @@ import os
 import sys
 from os.path import expanduser
 from pathlib import Path
-from typing import Optional
 
 import toml
 
@@ -16,7 +15,7 @@ class ConfigException(Exception):
     pass
 
 
-def get_config(config_path: Optional[str] = None) -> ConfigDict:
+def get_config(config_path: str | None = None) -> ConfigDict:
     make_config_directory_if_not_exists()
     if config_path is None:
         config_path = DEFAULT_CONFIG_PATH
@@ -34,13 +33,17 @@ def get_config(config_path: Optional[str] = None) -> ConfigDict:
     user = "postgres"
     password = "postgres"
     port = 5432
-    dbname = "jaffle_shop" """
+    dbname = "jaffle_shop"
+
+    [connections.duckdb-jaffle]
+    type = "duckdb"
+    path = "~/src/github.com/dbt-labs/jaffle_shop_duckdb/jaffle_shop.duckdb" """
         )
         sys.exit(1)
     return config
 
 
-def get_connection_from_config(config: ConfigDict, connection: Optional[str] = None):
+def get_connection_from_config(config: ConfigDict, connection: str | None = None):
     if connection is not None:
         return config["connections"][connection]
     elif len(config["connections"].keys()) == 1:
