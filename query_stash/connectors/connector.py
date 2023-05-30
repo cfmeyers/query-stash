@@ -35,7 +35,6 @@ class Connector:
         self.connection_type = self.connection_config["type"]
         self.conn = self.get_connection(self.connection_config)
         self.connection_name = connection_name
-        self.connection_type = self.connection_config["type"]
 
     def get_connection(
         self, config: ConfigDict
