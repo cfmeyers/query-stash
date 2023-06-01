@@ -1,10 +1,16 @@
-from typing import List, Union
+from typing import List
 
 from snowflake.connector.errors import ProgrammingError
 
 from query_stash.config import get_config, get_connection_from_config
 from query_stash.types import ConfigDict, RowDict
 
+from .duckdb import (
+    DuckDBDictCursor,
+    DuckDBPyConnection,
+    get_duckdb_connection,
+    get_duckdb_dict_cursor,
+)
 from .postgres import (
     PostgresConnection,
     PostgresDictCursor,
@@ -38,18 +44,24 @@ class Connector:
 
     def get_connection(
         self, config: ConfigDict
-    ) -> Union[PostgresConnection, SnowflakeConnection]:
+    ) -> PostgresConnection | SnowflakeConnection | DuckDBPyConnection:
         if self.is_postgres:
             return get_postgres_connection(config)
         elif self.is_snowflake:
             return get_snowflake_connection(config)
+        elif self.is_duckdb:
+            return get_duckdb_connection(config)
         raise Exception(f"Unknown connection type: {self.connection_type}")
 
-    def get_dict_cursor(self) -> Union[PostgresDictCursor, SnowflakeDictCursor]:
+    def get_dict_cursor(
+        self,
+    ) -> PostgresDictCursor | SnowflakeDictCursor | DuckDBDictCursor:
         if self.is_postgres:
             return get_postgres_dict_cursor(self.conn)
         if self.is_snowflake:
             return get_snowflake_dict_cursor(self.conn)
+        if self.is_duckdb:
+            return get_duckdb_dict_cursor(self.conn)
         raise Exception(f"Unknown connection type: {self.connection_type}")
 
     def get_results(self, query: str) -> tuple[str | None, List[RowDict]]:
@@ -69,3 +81,7 @@ class Connector:
     @property
     def is_snowflake(self) -> bool:
         return self.connection_type == "snowflake"
+
+    @property
+    def is_duckdb(self) -> bool:
+        return self.connection_type == "duckdb"
