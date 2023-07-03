@@ -13,6 +13,9 @@ requirements = [
     "toml==0.9.0",
     "psycopg2-binary==2.9.3",
     "snowflake-connector-python==2.7.7",
+    "duckdb==0.7.1",
+    "pandas==2.0.2",
+    "numpy==1.24.3",
 ]
 
 setup_requirements = [
