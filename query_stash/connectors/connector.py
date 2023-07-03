@@ -11,6 +11,7 @@ from .duckdb import (
     get_duckdb_connection,
     get_duckdb_dict_cursor,
 )
+from .mysql import MySQLConnection, get_mysql_connection, get_mysql_dict_cursor
 from .postgres import (
     PostgresConnection,
     PostgresDictCursor,
@@ -25,15 +26,6 @@ from .snowflake import (
 )
 
 
-def get_connection(config: ConfigDict):
-    connection_type = config["type"]
-    if connection_type == "postgres":
-        return get_postgres_connection(config)
-    elif connection_type == "snowflake":
-        return get_snowflake_connection(config)
-    raise Exception(f"Unknown connection type: {connection_type}")
-
-
 class Connector:
     def __init__(self, config_path: str | None, connection_name: str):
         config = get_config(config_path)
@@ -44,13 +36,15 @@ class Connector:
 
     def get_connection(
         self, config: ConfigDict
-    ) -> PostgresConnection | SnowflakeConnection | DuckDBPyConnection:
+    ) -> PostgresConnection | SnowflakeConnection | DuckDBPyConnection | MySQLConnection:
         if self.is_postgres:
             return get_postgres_connection(config)
         elif self.is_snowflake:
             return get_snowflake_connection(config)
         elif self.is_duckdb:
             return get_duckdb_connection(config)
+        elif self.is_mysql:
+            return get_mysql_connection(config)
         raise Exception(f"Unknown connection type: {self.connection_type}")
 
     def get_dict_cursor(
@@ -62,6 +56,8 @@ class Connector:
             return get_snowflake_dict_cursor(self.conn)
         if self.is_duckdb:
             return get_duckdb_dict_cursor(self.conn)
+        if self.is_mysql:
+            return get_mysql_dict_cursor(self.conn)
         raise Exception(f"Unknown connection type: {self.connection_type}")
 
     def get_results(self, query: str) -> tuple[str | None, List[RowDict]]:
@@ -85,3 +81,7 @@ class Connector:
     @property
     def is_duckdb(self) -> bool:
         return self.connection_type == "duckdb"
+
+    @property
+    def is_mysql(self) -> bool:
+        return self.connection_type == "mysql"
