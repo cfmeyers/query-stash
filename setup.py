@@ -16,6 +16,7 @@ requirements = [
     "duckdb==0.7.1",
     "pandas==2.0.2",
     "numpy==1.24.3",
+    "mysql-connector-python==8.0.33",
 ]
 
 setup_requirements = [
