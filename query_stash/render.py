@@ -1,3 +1,4 @@
+import math
 import re
 from datetime import datetime
 from decimal import Decimal
@@ -48,6 +49,11 @@ def pretty_int(amount) -> str:
     int_str = "{0:,.0f}".format(amount)
     return int_str
 
+def is_nan(item):
+    try:
+        return math.isnan(item)
+    except:
+        return False
 
 class ColumnSpec(NamedTuple):
     """An object that renders all the values for a particular column in a table"""
@@ -59,7 +65,7 @@ class ColumnSpec(NamedTuple):
     def transform(self, item, width: Optional[int] = None) -> str:
         if width is None:
             width = self.width
-        if item is None:
+        if item is None or is_nan(item):
             item = NULL_CHAR
         transformed = self.func(item)
         if type(transformed) != str:
