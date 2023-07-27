@@ -261,6 +261,14 @@ class RenderedPivotedTable(NamedTuple):
     def __len__(self):
         return len(self.rows)
 
+def guess_column_type(rows: List[RowDict], column_name: str):
+    """Hack because pandas (for duckdb connector) mixes float and str types"""
+    first_row_type = type(rows[0][column_name])
+    last_row_type = type(rows[-1][column_name])
+    if str in (first_row_type, last_row_type):
+        return str
+    else:
+        return first_row_type
 
 def get_rendered_table(rows: List[RowDict]) -> RenderedTable:
     """Get a RenderedTable with standard ColumnSpecs
@@ -271,7 +279,7 @@ def get_rendered_table(rows: List[RowDict]) -> RenderedTable:
     col_specs = []
     column_names = rows[0].keys()
     for column_name in column_names:
-        column_type = type(rows[0][column_name])
+        column_type = guess_column_type(rows, column_name)
         values = [r[column_name] for r in rows if r[column_name] is not None]
         if column_type == datetime:
             spec = ColumnSpec(column_name, width=19, func=pretty_datetime)
