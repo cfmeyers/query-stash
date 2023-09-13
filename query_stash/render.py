@@ -20,6 +20,8 @@ COMMA_SUBSTRINGS = (
     "CT",
 )
 
+NON_COMMA_SUBSTRINGS = ("tkn", "TKN")
+
 
 def pretty_datetime(d: Optional[datetime]) -> str:
     if d == NULL_CHAR or d is None:
@@ -37,23 +39,38 @@ def pretty_money(amount) -> str:
 def pretty_generic_decimal(amount) -> str:
     if amount == NULL_CHAR:
         return NULL_CHAR
+    if type(amount) == str:
+        return "¿?"
     rounded_str = "{0:,.8f}".format(amount)
     no_trailing_zeros = rounded_str.rstrip("0")
     if no_trailing_zeros[-1] == ".":
         return no_trailing_zeros + "0"
     return no_trailing_zeros
-    # return rounded_str
+
+
+def pretty_generic_decimal_no_commas(amount) -> str:
+    if amount == NULL_CHAR:
+        return NULL_CHAR
+    if type(amount) == str:
+        return "¿?"
+    rounded_str = "{0:.8f}".format(amount)
+    no_trailing_zeros = rounded_str.rstrip("0")
+    if no_trailing_zeros[-1] == ".":
+        return no_trailing_zeros + "0"
+    return no_trailing_zeros
 
 
 def pretty_int(amount) -> str:
     int_str = "{0:,.0f}".format(amount)
     return int_str
 
+
 def is_nan(item):
     try:
         return math.isnan(item)
     except:
         return False
+
 
 class ColumnSpec(NamedTuple):
     """An object that renders all the values for a particular column in a table"""
@@ -105,6 +122,14 @@ def should_be_formatted_with_commas(column_name: str) -> bool:
     ends_with_comma_word = bool(re.search("_(" + comma_keywords + ")$", column_name))
     ends_with_s = bool(re.search(r"s$", column_name))
     return starts_with_comma_word or ends_with_comma_word or ends_with_s
+
+
+def should_not_be_formatted_with_commas(column_name: str) -> bool:
+    non_comma_keywords = "|".join(NON_COMMA_SUBSTRINGS)
+    ends_with_comma_word = bool(
+        re.search("_(" + non_comma_keywords + ")$", column_name)
+    )
+    return ends_with_comma_word
 
 
 def get_max_width_of_items(items, with_commas=False) -> int:
@@ -267,6 +292,7 @@ class RenderedPivotedTable(NamedTuple):
     def __len__(self):
         return len(self.rows)
 
+
 def guess_column_type(rows: List[RowDict], column_name: str):
     """Hack because pandas (for duckdb connector) mixes float and str types"""
     first_row_type = type(rows[0][column_name])
@@ -275,6 +301,7 @@ def guess_column_type(rows: List[RowDict], column_name: str):
         return str
     else:
         return first_row_type
+
 
 def get_rendered_table(rows: List[RowDict]) -> RenderedTable:
     """Get a RenderedTable with standard ColumnSpecs
@@ -289,10 +316,17 @@ def get_rendered_table(rows: List[RowDict]) -> RenderedTable:
         values = [r[column_name] for r in rows if r[column_name] is not None]
         if column_type == datetime:
             spec = ColumnSpec(column_name, width=19, func=pretty_datetime)
+        elif column_type in (Decimal, float) and should_not_be_formatted_with_commas(
+            column_name
+        ):
+            spec = ColumnSpec(
+                column_name,
+                width=get_max_width_of_items([column_name] + values),
+                func=pretty_generic_decimal_no_commas,
+            )
         elif column_type in (Decimal, float):
             spec = ColumnSpec(
                 column_name,
-                # width=get_max_width_of_items([column_name] + values) + 6,
                 width=get_max_width_of_items([column_name] + values),
                 func=pretty_generic_decimal,
             )
