@@ -22,7 +22,7 @@ def datetime_series_should_be_date(series):
 
 def force_dates_to_be_dates_in_dataframe(df):
     for col in df.columns:
-        if df[col].dtype == "datetime64[ns]":
+        if df[col].dtype in ("datetime64[ns]", "datetime64[us]"):
             if datetime_series_should_be_date(df[col]):
                 df[col] = df[col].dt.date
     return df
