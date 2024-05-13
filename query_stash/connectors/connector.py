@@ -5,6 +5,12 @@ from snowflake.connector.errors import ProgrammingError
 from query_stash.config import get_config, get_connection_from_config
 from query_stash.types import ConfigDict, RowDict
 
+from .clickhouse import (
+    ClickhouseConnection,
+    ClickhouseDictCursor,
+    get_clickhouse_connection,
+    get_clickhouse_dict_cursor,
+)
 from .duckdb import (
     DuckDBDictCursor,
     DuckDBPyConnection,
@@ -36,7 +42,7 @@ class Connector:
 
     def get_connection(
         self, config: ConfigDict
-    ) -> PostgresConnection | SnowflakeConnection | DuckDBPyConnection | MySQLConnection:
+    ) -> PostgresConnection | SnowflakeConnection | DuckDBPyConnection | MySQLConnection | ClickhouseConnection:
         if self.is_postgres:
             return get_postgres_connection(config)
         elif self.is_snowflake:
@@ -45,11 +51,13 @@ class Connector:
             return get_duckdb_connection(config)
         elif self.is_mysql:
             return get_mysql_connection(config)
+        elif self.is_clickhouse:
+            return get_clickhouse_connection(config)
         raise Exception(f"Unknown connection type: {self.connection_type}")
 
     def get_dict_cursor(
         self,
-    ) -> PostgresDictCursor | SnowflakeDictCursor | DuckDBDictCursor:
+    ) -> PostgresDictCursor | SnowflakeDictCursor | DuckDBDictCursor | ClickhouseDictCursor:
         if self.is_postgres:
             return get_postgres_dict_cursor(self.conn)
         if self.is_snowflake:
@@ -58,6 +66,8 @@ class Connector:
             return get_duckdb_dict_cursor(self.conn)
         if self.is_mysql:
             return get_mysql_dict_cursor(self.conn)
+        if self.is_clickhouse:
+            return get_clickhouse_dict_cursor(self.conn)
         raise Exception(f"Unknown connection type: {self.connection_type}")
 
     def get_results(self, query: str) -> tuple[str | None, List[RowDict]]:
@@ -85,3 +95,7 @@ class Connector:
     @property
     def is_mysql(self) -> bool:
         return self.connection_type == "mysql"
+
+    @property
+    def is_clickhouse(self) -> bool:
+        return self.connection_type == "clickhouse"

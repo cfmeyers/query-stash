@@ -13,10 +13,11 @@ requirements = [
     "toml==0.9.0",
     "psycopg2-binary==2.9.3",
     "snowflake-connector-python==2.7.7",
-    "duckdb==0.7.1",
+    "duckdb==0.10.0",
     "pandas==2.0.2",
     "numpy==1.24.3",
     "mysql-connector-python==8.0.33",
+    "clickhouse-driver==0.2.7",
 ]
 
 setup_requirements = [
