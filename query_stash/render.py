@@ -20,7 +20,7 @@ COMMA_SUBSTRINGS = (
     "CT",
 )
 
-NON_COMMA_SUBSTRINGS = ("tkn", "TKN")
+NON_COMMA_SUBSTRINGS = ("tkn", "TKN", "id", "ID")
 
 
 def pretty_datetime(d: Optional[datetime]) -> str:
@@ -316,9 +316,11 @@ def get_rendered_table(rows: List[RowDict]) -> RenderedTable:
         values = [r[column_name] for r in rows if r[column_name] is not None]
         if column_type == datetime:
             spec = ColumnSpec(column_name, width=19, func=pretty_datetime)
-        elif column_type in (Decimal, float) and should_not_be_formatted_with_commas(
-            column_name
-        ):
+        elif column_type in (
+            Decimal,
+            float,
+            int,
+        ) and should_not_be_formatted_with_commas(column_name):
             spec = ColumnSpec(
                 column_name,
                 width=get_max_width_of_items([column_name] + values),
